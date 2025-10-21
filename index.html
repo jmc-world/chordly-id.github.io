@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akor Musik Lengkap</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Times New Roman", Roboto, Helvetica, Arial, sans-serif;
+            color: #000000; /* Warna tulisan hitam */
+            /* Background gradasi 50% putih dan 50% hitam */
+            background: linear-gradient(to bottom, #e70000 50%, #FFFFFF 50%);
+            background-attachment: fixed; /* Bikin gradient diem di tempat pas di-scroll */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
+
+        /* Bagian Judul dan Tagline */
+        .header-container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            margin-top: 0.5rem;
+            color: #333;
+        }
+
+        /* Bagian Pilihan Nada Dasar */
+        .controls {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        label {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        select#root-note-selector {
+            font-size: 1.1rem;
+            padding: 0.5rem 0.8rem;
+            border: 2px solid #000000;
+            border-radius: 8px;
+            background-color: #FFFFFF;
+            color: #000000;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27292.4%27%20height%3D%27292.4%27%3E%3Cpath%20fill%3D%27%23000000%27%20d%3D%27M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%27%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+            padding-right: 2.5em;
+        }
+        
+        select#root-note-selector:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+        }
+
+        /* Area Tampilan Akor */
+        #chord-display-area {
+            width: 100%;
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+            gap: 1.5rem;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .chord-category {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .chord-category h3 {
+            font-size: 1.4rem;
+            border-bottom: 2px solid #000;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .chord-list span {
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: 500;
+            background-color: #f0f0f0;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .chord-list span:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        /* Style untuk Popup/Modal */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%;
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6);
+            padding-top: 120px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 25px 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 300px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #modal-chord-name {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+
+        #modal-chord-notes {
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Responsive untuk HP */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+            .header-container, .controls, #chord-display-area {
+                padding: 1rem;
+                width: 95%;
+            }
+            #chord-display-area {
+                grid-template-columns: 1fr; /* Satu kolom di HP */
+            }
+            .modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header-container">
+        <h1>Akor Musik Lengkap</h1>
+        <p class="tagline">Website Sederhana untuk semua instrumen.</p>
+    </header>
+
+    <div class="controls">
+        <label for="root-note-selector">Pilih Nada Dasar:</label>
+        <select id="root-note-selector">
+            <option value="C">C</option>
+            <option value="C#">C# / Db</option>
+            <option value="D">D</option>
+            <option value="D#">D# / Eb</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="F#">F# / Gb</option>
+            <option value="G">G</option>
+            <option value="G#">G# / Ab</option>
+            <option value="A">A</option>
+            <option value="A#">A# / Bb</option>
+            <option value="B">B</option>
+        </select>
+    </div>
+
+    <main id="chord-display-area">
+        <!-- Hasil akor akan ditampilkan di sini oleh JavaScript -->
+    </main>
+    
+    <footer>
+        <p>@Copyright 2025 JMC Media - All Rights Reserved</p>
+    </footer>
+
+    <!-- HTML untuk Popup/Modal -->
+    <div id="chord-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 id="modal-chord-name"></h2>
+            <p id="modal-chord-notes"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('root-note-selector');
+            const displayArea = document.getElementById('chord-display-area');
+            const modal = document.getElementById('chord-modal');
+            const closeModalBtn = document.querySelector('.close-button');
+            const modalChordName = document.getElementById('modal-chord-name');
+            const modalChordNotes = document.getElementById('modal-chord-notes');
+
+            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+            const chordFormulas = {
+                '': [0, 4, 7], // Major
+                'm': [0, 3, 7], // Minor
+                'sus2': [0, 2, 7],
+                'sus4': [0, 5, 7],
+                '7': [0, 4, 7, 10],
+                'maj7': [0, 4, 7, 11],
+                'm7': [0, 3, 7, 10],
+                'm(maj7)': [0, 3, 7, 11],
+                'dim7': [0, 3, 6, 9],
+                '7sus4': [0, 5, 7, 10],
+                '6': [0, 4, 7, 9],
+                'm6': [0, 3, 7, 9],
+                '9': [0, 4, 7, 10, 14],
+                'm9': [0, 3, 7, 10, 14],
+                'maj9': [0, 4, 7, 11, 14],
+                '11': [0, 7, 10, 14, 17], // No 3rd
+                'm11': [0, 3, 7, 10, 14, 17],
+                '13': [0, 4, 7, 10, 14, 21], // No 11th
+                'aug': [0, 4, 8],
+                'dim': [0, 3, 6],
+                '7b5': [0, 4, 6, 10],
+                'm7b5': [0, 3, 6, 10],
+                '7#5': [0, 4, 8, 10],
+                '9b5': [0, 4, 6, 10, 14],
+                '9#5': [0, 4, 8, 10, 14],
+            };
+
+            const chordTypes = {
+                'Akor Umum': ['', 'm', 'sus2', 'sus4'],
+                'Akor 7th (Seventh Chord)': ['7', 'maj7', 'm7', 'm(maj7)', 'dim7', '7sus4'],
+                'Akor Ekstensi (Extended Chord)': ['6', 'm6', '9', 'm9', 'maj9', '11', 'm11', '13'],
+                'Akor Alter (Alter Chord)': ['aug', 'dim', '7b5', 'm7b5', '7#5', '9b5', '9#5']
+            };
+            
+            function getChordNotes(rootNote, suffix) {
+                const rootIndex = notes.indexOf(rootNote);
+                if (rootIndex === -1) return 'Nada dasar tidak valid';
+
+                const formula = chordFormulas[suffix];
+                if (!formula) return 'Formula akor tidak ditemukan';
+
+                return formula.map(interval => notes[(rootIndex + interval) % 12]).join(' - ');
+            }
+
+            function showChordInfo(chordName) {
+                // Parsing nama akor, misal "C#m7b5" menjadi root "C#" dan suffix "m7b5"
+                const rootMatch = chordName.match(/^[A-G]#?/);
+                const root = rootMatch ? rootMatch[0] : '';
+                const suffix = chordName.substring(root.length);
+
+                const notesString = getChordNotes(root, suffix);
+                
+                modalChordName.textContent = chordName;
+                modalChordNotes.textContent = notesString;
+                modal.style.display = 'block';
+            }
+
+            function renderChords() {
+                const selectedRoot = selector.value.split(' ')[0];
+                displayArea.innerHTML = ''; 
+
+                for (const category in chordTypes) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'chord-category';
+
+                    const categoryTitle = document.createElement('h3');
+                    categoryTitle.textContent = category;
+                    categoryDiv.appendChild(categoryTitle);
+                    
+                    const chordListDiv = document.createElement('div');
+                    chordListDiv.className = 'chord-list';
+
+                    chordTypes[category].forEach(suffix => {
+                        const chordName = selectedRoot + suffix;
+                        const chordSpan = document.createElement('span');
+                        chordSpan.textContent = chordName;
+                        chordSpan.addEventListener('click', () => showChordInfo(chordName));
+                        chordListDiv.appendChild(chordSpan);
+                    });
+                    
+                    categoryDiv.appendChild(chordListDiv);
+                    displayArea.appendChild(categoryDiv);
+                }
+            }
+            
+            // Event listener untuk menutup modal
+            closeModalBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            selector.addEventListener('change', renderChords);
+
+            renderChords();
+        });
+    </script>
+</body>
+</html>
+
+
